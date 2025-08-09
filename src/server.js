@@ -1,24 +1,41 @@
-// server.js
-import express from 'express';
-import axios from 'axios';
-import cors from 'cors';
+import express from "express";
+import cors from "cors";
+import axios from "axios";
 
 const app = express();
+const PORT = 3001;
+
 app.use(cors());
 app.use(express.json());
 
-app.post('/api/translate', async (req, res) => {
+app.post("/translate", async (req, res) => {
   try {
-    const response = await axios.post("https://libretranslate.de/translate", req.body, {
-      headers: { "Content-Type": "application/json" }
-    });
-    res.json(response.data);
+    const { q, source, target } = req.body;
+
+    if (!q || !source || !target) {
+      return res.status(400).json({ error: "Отсутствуют необходимые поля" });
+    }
+
+    const response = await axios.post(
+      "https://libretranslate.de/translate",
+      {
+        q,
+        source,
+        target,
+        format: "text"
+      },
+      {
+        headers: { "Content-Type": "application/json" }
+      }
+    );
+
+    res.json({ translatedText: response.data.translatedText });
   } catch (err) {
-    console.error("Ошибка на сервере перевода:", err);
-    res.status(500).send("Ошибка при переводе");
+    console.error("Ошибка перевода:", err.message);
+    res.status(500).json({ error: "Ошибка перевода" });
   }
 });
 
-app.listen(3001, () => {
-  console.log('Proxy server listening on port 3001');
+app.listen(PORT, () => {
+  console.log(`Сервер запущен на http://localhost:${PORT}`);
 });

@@ -1,35 +1,34 @@
-import axios from "axios";
-import { translateToEnglish, translateToRussian } from "./translate";
 
-const API_KEY = "b6cf10d5b1cd4cf68673f0c4a1e7ec57";
+import axios from "axios";
+
+const API_KEY = "678a6f5403274b50943248adef85c583";
+const BASE_URL = "https://api.spoonacular.com/recipes/complexSearch";
+const RECIPE_URL = "https://api.spoonacular.com/recipes";
 
 export async function searchRecipes(query) {
   try {
-    const englishQuery = await translateToEnglish(query);
-
-    const response = await axios.get("https://api.spoonacular.com/recipes/complexSearch", {
+    const res = await axios.get(BASE_URL, {
       params: {
-        query: englishQuery,
-        number: 10,
+        query,
+        number: 12,
         apiKey: API_KEY,
       },
     });
-
-    // ⬇ Переводим названия рецептов
-    const translatedResults = await Promise.all(
-      response.data.results.map(async (recipe) => {
-        const translatedTitle = await translateToRussian(recipe.title);
-        return {
-          ...recipe,
-          title: translatedTitle,
-        };
-      })
-    );
-
-    return translatedResults;
-
+    return res.data.results;
   } catch (err) {
     console.error("Ошибка при получении рецептов:", err);
     return [];
+  }
+}
+
+export async function getRecipeById(id) {
+  try {
+    const res = await axios.get(`${RECIPE_URL}/${id}/information`, {
+      params: { apiKey: API_KEY },
+    });
+    return res.data;
+  } catch (err) {
+    console.error("Ошибка при получении рецепта:", err);
+    return null;
   }
 }

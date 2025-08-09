@@ -1,24 +1,15 @@
 import React, { useState } from "react";
 import { searchRecipes } from "../services/api";
-import RecipeCard from "../components/RecipeCard";
+import { Link } from "react-router-dom";
 
-function Home() {
+export default function Home() {
   const [query, setQuery] = useState("");
   const [recipes, setRecipes] = useState([]);
-  const [loading, setLoading] = useState(false);
 
   const handleSearch = async () => {
-    if (!query.trim()) return;
-    try {
-      setLoading(true);
-      const results = await searchRecipes(query);
-      setRecipes(results);
-    } catch (error) {
-      console.error("Ошибка при поиске рецептов:", error);
-      setRecipes([]);
-    } finally {
-      setLoading(false);
-    }
+    if (query.trim() === "") return;
+    const results = await searchRecipes(query);
+    setRecipes(results);
   };
 
   const handleKeyDown = (e) => {
@@ -28,37 +19,80 @@ function Home() {
   };
 
   return (
-    <div className="p-4 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4 text-center">Поиск рецептов</h1>
-      <div className="flex mb-6">
+    <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
+      <h1 style={{ textAlign: "center", color: "#333" }}>🍽 Recipe Finder</h1>
+      <div style={{ textAlign: "center", marginBottom: "20px" }}>
         <input
           type="text"
-          placeholder="Например: борщ, салат, курица..."
-          className="flex-grow p-2 rounded-l border border-gray-300"
           value={query}
+          placeholder="Введите ингредиент..."
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
+          style={{
+            padding: "10px",
+            width: "300px",
+            fontSize: "16px",
+            border: "1px solid #ccc",
+            borderRadius: "8px",
+            outline: "none",
+          }}
         />
-        <button
-          onClick={handleSearch}
-          className="bg-blue-600 text-white px-4 rounded-r hover:bg-blue-700 transition"
-        >
-          Найти
-        </button>
       </div>
 
-      {loading && <p>Загрузка...</p>}
-
-      {!loading && recipes.length === 0 && (
-        <p className="text-gray-500">Ничего не найдено.</p>
-      )}
-
-      {!loading &&
-        recipes.map((recipe) => (
-          <RecipeCard key={recipe.id} recipe={recipe} />
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+          gap: "15px",
+        }}
+      >
+        {recipes.map((recipe) => (
+          <Link
+            to={`/recipe/${recipe.id}`}
+            key={recipe.id}
+            style={{ textDecoration: "none" }}
+          >
+            <div
+              style={{
+                border: "1px solid #ddd",
+                borderRadius: "10px",
+                overflow: "hidden",
+                background: "#fff",
+                boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
+                transition: "transform 0.2s",
+                cursor: "pointer",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.transform = "scale(1.02)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.transform = "scale(1)")
+              }
+            >
+              <img
+                src={recipe.image}
+                alt={recipe.title}
+                style={{
+                  width: "100%",
+                  height: "150px",
+                  objectFit: "cover",
+                }}
+              />
+              <p
+                style={{
+                  fontSize: "16px",
+                  fontWeight: "bold",
+                  padding: "10px",
+                  textAlign: "center",
+                  color: "#555",
+                }}
+              >
+                {recipe.title}
+              </p>
+            </div>
+          </Link>
         ))}
+      </div>
     </div>
   );
 }
-
-export default Home;

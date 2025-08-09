@@ -1,11 +1,14 @@
-import Home from './pages/Home';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Home from "./pages/Home.jsx";
+import RecipePage from "./pages/RecipePage.jsx";
 
-function App() {
+export default function App() {
   return (
-    <div className="p-4">
-      <Home />
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/recipe/:id" element={<RecipePage />} />
+      </Routes>
+    </Router>
   );
 }
-
-export default App;
